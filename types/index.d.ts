@@ -114,9 +114,15 @@ declare type CreateUserParams = {
   };
   
   declare type SearchParamProps = {
-    params: Promise<{ id: string; type: TransformationTypeKey }>;
-    searchParams: { [key: string]: string | string[] | undefined };
+    params: Promise<{
+      id: string;
+      type: TransformationTypeKey;
+    }>;
+    searchParams: Promise<{
+      [key: string]: string | string[] | undefined;
+    }>;
   };
+  
   
   declare type TransformationFormProps = {
     action: "Add" | "Update";
