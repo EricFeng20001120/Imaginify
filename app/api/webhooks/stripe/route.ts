@@ -1,25 +1,35 @@
 /* eslint-disable camelcase */
 import { createTransaction } from '@/lib/actions/transaction.action'
-import { NextResponse } from 'next/server'
-import stripe from 'stripe'
+import {Stripe} from 'stripe';
+import {NextResponse} from 'next/server';
+import {headers} from 'next/headers';
 
-const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-export async function POST(request: Request) {
-  const body = await request.text()
-  const sig = request.headers.get('stripe-signature')!
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
-  let event
+export async function POST(req: Request) {
+  let event: Stripe.Event;
 
   try {
-    event = stripeInstance.webhooks.constructEvent(body, sig, endpointSecret)
+    const stripeSignature = (await headers()).get('stripe-signature');
+
+    event = stripe.webhooks.constructEvent(
+      await req.text(),
+      stripeSignature as string,
+      process.env.STRIPE_WEBHOOK_SECRET as string
+    );
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    // On error, log and return the error message.
+    if (err! instanceof Error) console.log(err);
+    console.log(`❌ Error message: ${errorMessage}`);
     return NextResponse.json(
-      { message: 'Webhook error', error: err, body:body, sig:sig},
-      { status: 400 }
-    )
+      {message: `Webhook Error: ${errorMessage}`},
+      {status: 400}
+    );
   }
+
+  // Successfully constructed event.
+  console.log('✅ Success:', event.id);
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
@@ -37,10 +47,10 @@ export async function POST(request: Request) {
   }
 
   return new Response('', { status: 200 })
-}
+};
 
 export const config = {
   api: {
     bodyParser: false,
   },
-}
+};
