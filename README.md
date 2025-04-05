@@ -1,4 +1,5 @@
 # AI Image Tools Platform
+<img src="./public/logo-github.png" alt="Project Banner">
 
 **Imaginify** is a cloud-based SaaS solution offering a robust set of AI-driven image enhancement services. From secure payment handling to intelligent image searching, the platform empowers users with next-gen features like image restoration, color adjustment, content-aware fill, object deletion, and background extraction.
 
